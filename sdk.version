@@ -1,0 +1,9 @@
+The files of the Leapmotion Linux SDK included in this repository are from version v.0.8.0.5300 for Linux.
+These files are the following:
+Leap.py
+LeapPython.so
+libLeap.so
+
+I put it here for convenience. If a newer SDK is released, just use the new files in place of these one.
+
+LM Croisez.
