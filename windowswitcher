@@ -4,6 +4,8 @@
 # Basically, if it detects your hand presence (a hand + more than 3 fingers detected), it simulate the alt-tab keys, and keeps pressing alt, to show the windows carousel.
 # After that, if you move your hand to the left(/right), the carousel shifts left(/right)
 # If you retract your hand (or if the Leap detects less than 3 fingers), the alt key is released, and the carousel disappears.
+# All keys simulation are done by using the xdotool binary. It should be already installed on your Linux distribution. If not, find it in your software repository.
+# For Ubuntu, the command is: sudo apt-get install xdotool
 #
 import Leap, sys
 from subprocess import call
