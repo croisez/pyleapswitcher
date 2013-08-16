@@ -1,5 +1,10 @@
 #!/usr/bin/python
-
+#
+# This script allows you to use the Leapmotion to switch between windows under Linux.
+# Basically, if it detects your hand presence (a hand + more than 3 fingers detected), it simulate the alt-tab keys, and keeps pressing alt, to show the windows carousel.
+# After that, if you move your hand to the left(/right), the carousel shifts left(/right)
+# If you retract your hand (or if the Leap detects less than 3 fingers), the alt key is released, and the carousel disappears.
+#
 import Leap, sys
 from subprocess import call
 import os, sys
