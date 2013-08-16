@@ -1,0 +1,99 @@
+#!/usr/bin/python
+
+import Leap, sys
+from subprocess import call
+import os, sys
+from time import sleep
+import signal
+
+debug = False
+
+class XdotoolListener(Leap.Listener):
+	state = "xdo_idle"
+
+	def on_init(self, controller):
+		self.state = "xdo_idle"
+
+	def on_connect(self, controller):
+		controller.enable_gesture(Leap.Gesture.TYPE_CIRCLE);
+		controller.enable_gesture(Leap.Gesture.TYPE_KEY_TAP);
+
+	def on_disconnect(self, controller):
+		if debug: print "Disconnected"
+
+	def on_exit(self, controller):
+		if debug: print "Exited"
+
+	def on_frame(self, controller):
+		sleep(0.01)
+		frame = controller.frame()
+
+		if self.state == "xdo_idle":
+			if len(frame.fingers) > 3:			
+				self.state = "xdo_show"
+				showcarousel(self.state, frame)
+				
+		elif self.state == "xdo_show":
+			if len(frame.fingers) > 3:
+				
+				if not frame.hands.empty:
+					hand = frame.hands[0]
+					if hand.palm_velocity[0] < -400:
+						self.state = "xdo_move"
+						moveleft(self.state, frame)
+					if hand.palm_velocity[0] > 400:
+						self.state = "xdo_move"
+						moveright(self.state, frame)			
+
+			elif len(frame.fingers) < 2:
+				self.state = "xdo_idle"
+				hidecarousel(self.state, frame)
+
+			
+		elif self.state == "xdo_move":
+			if not frame.hands.empty:
+				hand = frame.hands[0]
+				if hand.palm_velocity[0] > -100 and hand.palm_velocity[0] < 100:
+					self.state = "xdo_show"
+
+
+def showcarousel(state, frame):
+	call(["xdotool", "keydown", "alt", "key", "Tab"])
+	if debug: print "(show carousel)  state=%s, fingers: %d, gestures: %d" % (state, len(frame.fingers), len(frame.gestures()))
+
+def hidecarousel(state, frame):
+	call(["xdotool", "keyup", "alt"])
+	if debug: print "(hide carousel)  state=%s, fingers: %d, gestures: %d" % (state, len(frame.fingers), len(frame.gestures()))
+
+def moveleft(state, frame):
+	call(["xdotool", "key", "shift+Tab"])
+	if debug: print "(move left)  state=%s, fingers: %d, gestures: %d" % (state, len(frame.fingers), len(frame.gestures()))
+	
+def moveright(state, frame):
+	call(["xdotool", "key", "Tab"])
+	if debug: print "(move right)  state=%s, fingers: %d, gestures: %d" % (state, len(frame.fingers), len(frame.gestures()))
+	
+	
+def main():
+	signal.signal(signal.SIGTERM, on_exit)
+	
+	try:
+		listener = XdotoolListener()
+		controller = Leap.Controller()
+		controller.add_listener(listener)
+		if debug: print "Press Enter to quit..."
+		sys.stdin.readline()
+		controller.remove_listener(listener)
+
+	except:
+		controller.remove_listener(listener)
+		if debug: print "exception"
+
+
+def on_exit(sig, func=None):
+	if debug: print "exit on signal"
+	controller.remove_listener(listener)
+
+
+if __name__ == "__main__":
+	main()
